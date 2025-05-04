@@ -29,7 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // Attach the markerhandler component to the scene
-        document.querySelector('a-scene').setAttribute('markerhandler', '');
+        const scene = document.querySelector('a-scene');
+        scene.setAttribute('markerhandler', '');
         
         function mockImageDetection(targetIndex) {
             const event = new CustomEvent('targetFound', {
