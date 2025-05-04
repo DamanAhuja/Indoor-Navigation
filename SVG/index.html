@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SVG Graph Parser with Dijkstra</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script> <!-- A-Frame CDN -->
@@ -8,38 +10,76 @@
     body {
       margin: 0;
       padding: 0;
+      overflow: hidden;
     }
 
     .container {
       display: flex;
-      flex-direction: row; /* Side-by-side layout */
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
 
+    /* Leaflet map in the bottom-left corner */
     #map {
-      width: 460px;
-      height: 900px;
+      width: 300px;  /* Adjust width */
+      height: 300px; /* Adjust height */
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 1; /* Ensures map stays behind the AR scene */
+      border: 1px solid #ccc; /* Optional: adds border to map */
     }
 
     #svgObject {
+      position: absolute;
       width: 600px;
       height: 900px;
-      border-left: 1px solid #ccc;
+      top: 0;
+      right: 0;
+      z-index: 2; /* Ensures SVG is above the map */
+    }
+
+    /* A-Frame scene setup */
+    a-scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3; /* Ensures AR content is above everything */
+      pointer-events: none; /* Allow interaction with the map */
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Leaflet Map -->
     <div id="map"></div>
+
+    <!-- SVG Object -->
     <object id="svgObject" type="image/svg+xml" data="RDSC.svg"></object>
   </div>
 
-  <!-- A-Frame scene element for markerhandler -->
-  <a-scene embedded></a-scene>
+  <!-- A-Frame AR scene -->
+  <a-scene embedded mindar="targetFile: ./Target Images/targets.mind; uiHint: false">
+    <!-- Add your A-Frame entities here -->
+  </a-scene>
 
   <!-- JS scripts -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="svg.js"></script>
   <script src="leaflet.js"></script>
   <script src="MarkerHandler.js"></script> <!-- Your external JS file -->
+
+  <script>
+    // Initialize the Leaflet map
+    // var map = L.map('map').setView([51.505, -0.09], 13); // Example coordinates
+    // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    // }).addTo(map);
+  </script>
 </body>
 </html>
