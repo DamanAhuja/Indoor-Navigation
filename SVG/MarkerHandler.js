@@ -1,4 +1,4 @@
-// MarkerHandler.js - Updated for MindAR integration
+// MarkerHandler.js - Updated for MindAR integration with version fix
 
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof AFRAME === 'undefined') {
@@ -7,19 +7,33 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     console.log("Initializing MarkerHandler component...");
+    
+    // Status indicator function
+    function updateStatus(message, isError = false) {
+        const statusEl = document.getElementById('statusIndicator');
+        if (statusEl) {
+            statusEl.textContent = message;
+            statusEl.style.backgroundColor = isError ? 
+                "rgba(255, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.7)";
+        }
+    }
 
     // Register the markerhandler component
     AFRAME.registerComponent('markerhandler', {
         init: function () {
-            console.log("MarkerHandler component initialized");
+            console.log("MarkerHandler component initialized on", this.el.id);
             
             // Store a reference to this component
             const self = this;
             
+            // Get the target index from the entity
+            const targetIndex = this.el.getAttribute('mindar-image-target').targetIndex;
+            console.log(`Setting up handler for target index: ${targetIndex}`);
+            
             // Set up event listeners for MindAR target detection
-            this.el.addEventListener('targetFound', function (event) {
-                const targetIndex = event.detail.targetIndex;
-                console.log("MindAR target found:", targetIndex);
+            this.el.addEventListener('targetFound', function () {
+                console.log(`Target ${targetIndex} found!`);
+                updateStatus(`Marker ${targetIndex + 1} detected!`);
                 
                 // Update debug info
                 document.getElementById('detectedIndex').textContent = targetIndex;
@@ -44,21 +58,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
             
-            this.el.addEventListener('targetLost', function (event) {
-                console.log("Target lost:", event.detail.targetIndex);
+            this.el.addEventListener('targetLost', function () {
+                console.log(`Target ${targetIndex} lost`);
+                updateStatus("Marker lost. Scan again.");
             });
         }
     });
 
-    // Wait until A-Frame is ready before attaching the component
+    // Wait until A-Frame is ready before attaching components
     const scene = document.querySelector('a-scene');
     if (scene.hasLoaded) {
-        attachMarkerHandler();
+        attachMarkerHandlers();
     } else {
-        scene.addEventListener('loaded', attachMarkerHandler);
+        scene.addEventListener('loaded', attachMarkerHandlers);
     }
 
-    function attachMarkerHandler() {
+    function attachMarkerHandlers() {
         // Attach the markerhandler component to all mindar-image-target entities
         const targets = document.querySelectorAll('a-entity[mindar-image-target]');
         
@@ -67,12 +82,13 @@ document.addEventListener("DOMContentLoaded", function () {
             targets.forEach(target => {
                 if (!target.hasAttribute('markerhandler')) {
                     target.setAttribute('markerhandler', '');
+                    console.log(`Attached markerhandler to ${target.id || 'unnamed target'}`);
                 }
             });
+            updateStatus("Ready to scan markers");
         } else {
-            // If no targets are found, attach to the scene as fallback
-            console.log("No mindar-image-targets found, attaching to scene");
-            scene.setAttribute('markerhandler', '');
+            console.warn("No mindar-image-targets found");
+            updateStatus("No markers configured", true);
         }
     }
 });
