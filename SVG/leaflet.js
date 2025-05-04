@@ -1,18 +1,24 @@
 window.addEventListener("load", () => {
-    const map = L.map('map', {
-        crs: L.CRS.Simple,
-        minZoom: -1
-    });
-
     const imageWidth = 230;
     const imageHeight = 450;
     const svgHeight = 450;
-    const imageBounds = [[0, 0], [imageHeight, imageWidth]];
-    L.imageOverlay('RDSC.jpg', imageBounds).addTo(map);
-    map.fitBounds(imageBounds);
 
     const scaleFactorX = imageWidth / 230;
     const scaleFactorY = imageHeight / 450;
+    const imageBounds = [[0, 0], [imageHeight, imageWidth]];
+
+    const map = L.map('map', {
+        crs: L.CRS.Simple,
+        minZoom: -1,
+        zoomControl: false
+    });
+
+    window.map = map; // Make accessible globally
+    L.imageOverlay('RDSC.jpg', imageBounds).addTo(map);
+    map.fitBounds(imageBounds);
+
+    // Fix potential rendering issues
+    setTimeout(() => map.invalidateSize(), 200);
 
     let nodeMap = {};
     let graph = {};
@@ -33,7 +39,6 @@ window.addEventListener("load", () => {
 
             nodes.forEach(n => nodeMap[n.id] = n);
 
-            // Build graph
             window.extractedEdges.forEach(edge => {
                 const from = nodeMap[edge.from];
                 const to = nodeMap[edge.to];
@@ -46,7 +51,7 @@ window.addEventListener("load", () => {
                 }
             });
 
-            // Render nodes
+            // Draw nodes
             nodes.forEach(node => {
                 L.circleMarker([node.y, node.x], {
                     radius: 5,
@@ -64,10 +69,22 @@ window.addEventListener("load", () => {
                 fillOpacity: 0.9
             }).addTo(map).bindPopup("You are here");
 
-            // Expose a global function to go to a destination
+            // --- Global functions ---
+            window.setUserLocation = function (markerId) {
+                const node = nodeMap[markerId];
+                if (!node) {
+                    console.warn("Invalid markerId:", markerId);
+                    return;
+                }
+                currentMarkerId = markerId;
+                userMarker.setLatLng([node.y, node.x]);
+                userMarker.openPopup();
+                clearPath();
+            };
+
             window.goTo = function (targetNodeId) {
                 if (!currentMarkerId) {
-                    console.warn("Current user location not set.");
+                    console.warn("User location not set.");
                     return;
                 }
                 const result = dijkstra(currentMarkerId, targetNodeId);
@@ -80,24 +97,11 @@ window.addEventListener("load", () => {
                 }
             };
 
-            // Set user's current location and update
-            window.setUserLocation = function (markerId) {
-                const match = nodeMap[markerId];
-                if (!match) {
-                    console.warn("Marker ID not found:", markerId);
-                    return;
-                }
-                currentMarkerId = markerId;
-                userMarker.setLatLng([match.y, match.x]);
-                userMarker.openPopup();
-                clearPath();
-            };
-
-            // Auto-set initial location for testing
+            // Auto-init for testing
             setTimeout(() => window.setUserLocation("Entrance"), 1000);
             setTimeout(() => window.goTo("Entrance2"), 2000);
 
-            // Pathfinding
+            // --- Pathfinding ---
             function dijkstra(start, end) {
                 const distances = {}, previous = {}, queue = new Set(Object.keys(graph));
                 for (const node of queue) {
@@ -148,16 +152,15 @@ window.addEventListener("load", () => {
 
             function drawPath(path) {
                 clearPath();
-
                 for (let i = 0; i < path.length - 1; i++) {
                     const from = nodeMap[path[i]];
                     const to = nodeMap[path[i + 1]];
-                    const edge = window.extractedEdges.find(edge =>
-                        (edge.from === from.id && edge.to === to.id) ||
-                        (edge.from === to.id && edge.to === from.id)
+                    const edge = window.extractedEdges.find(e =>
+                        (e.from === from.id && e.to === to.id) ||
+                        (e.from === to.id && e.to === from.id)
                     );
 
-                    if (edge && edge.controlPoints && edge.controlPoints.length === 2) {
+                    if (edge?.controlPoints?.length === 2) {
                         const cp1 = {
                             x: edge.controlPoints[0].x * scaleFactorX,
                             y: (svgHeight - edge.controlPoints[0].y) * scaleFactorY
@@ -174,12 +177,10 @@ window.addEventListener("load", () => {
                                 3 * Math.pow(1 - t, 2) * t * cp1.x +
                                 3 * (1 - t) * Math.pow(t, 2) * cp2.x +
                                 Math.pow(t, 3) * to.x;
-
                             const y = Math.pow(1 - t, 3) * from.y +
                                 3 * Math.pow(1 - t, 2) * t * cp1.y +
                                 3 * (1 - t) * Math.pow(t, 2) * cp2.y +
                                 Math.pow(t, 3) * to.y;
-
                             latlngs.push([y, x]);
                         }
 
@@ -191,8 +192,9 @@ window.addEventListener("load", () => {
                     }
                 }
             }
+
         } else {
-            setTimeout(waitForGraph, 100);
+            setTimeout(waitForGraph, 100); // Wait for extractedNodes/Edges to be ready
         }
     }
 
