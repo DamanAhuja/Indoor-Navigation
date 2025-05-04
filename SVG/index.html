@@ -6,6 +6,7 @@
   <title>AR Scene with Leaflet Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script> <!-- A-Frame CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/mindar.js/dist/aframe-mindar.js"></script> <!-- MindAR CDN -->
   <style>
     body {
       margin: 0;
@@ -40,8 +41,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 3; /* Ensures AR content is above everything */
-      pointer-events: none; /* Allow interaction with the map */
+      z-index: 2; /* Ensures AR content is above everything */
     }
   </style>
 </head>
@@ -53,7 +53,7 @@
   </div>
 
   <!-- A-Frame AR scene -->
-  <a-scene embedded mindar="targetFile: ../Target Images/targets.mind; uiHint: false">
+  <a-scene embedded mindar="targetFile: ./Target Images/targets.mind; uiHint: false">
     <!-- Add your A-Frame entities here -->
   </a-scene>
 
@@ -65,8 +65,8 @@
 
   <script>
     // Initialize the Leaflet map
-    /*var map = L.map('map').setView([51.505, -0.09], 13); // Example coordinates
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    var map = L.map('map').setView([51.505, -0.09], 13); // Example coordinates
+    /*L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);*/
   </script>
