@@ -2,18 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Scene with Leaflet Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AR Navigation with MindAR</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script> <!-- A-Frame CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/mindar.js/dist/aframe-mindar.js"></script> <!-- MindAR CDN -->
+  <!-- Load A-Frame first -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <!-- Then load MindAR with specific CDN URL -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
   <style>
     body {
       margin: 0;
       padding: 0;
       overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
-
     .container {
       display: flex;
       position: absolute;
@@ -22,53 +26,170 @@
       right: 0;
       bottom: 0;
     }
-
-    /* Leaflet map in the bottom-left corner */
     #map {
-      width: 300px;  /* Adjust width */
-      height: 300px; /* Adjust height */
+      width: 40vw;
+      height: 40vh;
       position: absolute;
-      bottom: 0;
-      left: 0;
-      z-index: 1; /* Ensures map stays behind the AR scene */
-      border: 1px solid #ccc; /* Optional: adds border to map */
+      bottom: 10px;
+      left: 10px;
+      z-index: 10;
+      border: 2px solid #333;
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.8);
     }
-
-    /* A-Frame scene setup */
-    a-scene {
+    #svgObject {
+      display: none; /* Hide the SVG object but keep it loaded */
+    }
+    .ar-only {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 2; /* Ensures AR content is above everything */
+      z-index: 1;
+    }
+    /* Loading screen */
+    #loadingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-family: Arial, sans-serif;
+      z-index: 1000;
+    }
+    #loadingText {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    /* Debug overlay */
+    #debugInfo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      z-index: 20;
+      max-width: 300px;
+      display: none; /* Initially hidden, toggle with button */
+    }
+    #debugToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 21;
+      padding: 5px 10px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div id="loadingScreen">
+    <div>Loading AR Experience...</div>
+    <div id="loadingText">Please wait while the markers are being processed.</div>
+  </div>
+  
+  <!-- Debug toggle button -->
+  <button id="debugToggle">Debug</button>
+  
+  <!-- Debug info panel -->
+  <div id="debugInfo">
+    <div>AR Status: <span id="arStatus">Initializing</span></div>
+    <div>Last Marker: <span id="lastMarker">None</span></div>
+    <div>Detected Index: <span id="detectedIndex">-1</span></div>
+  </div>
+
   <div class="container">
     <!-- Leaflet Map -->
     <div id="map"></div>
+    <!-- SVG object for path data - hidden but loaded -->
     <object id="svgObject" type="image/svg+xml" data="RDSC.svg"></object>
   </div>
 
   <!-- A-Frame AR scene -->
-  <a-scene embedded mindar="targetFile: ../Target Images/targets.mind; uiHint: false">
-    <!-- Add your A-Frame entities here -->
-  </a-scene>
+  <div class="ar-only">
+    <a-scene 
+      mindar-image="imageTargetSrc: ../Target Images/targets.mind; 
+                   showStats: false; 
+                   uiScanning: true;
+                   uiLoading: false;
+                   maxTrack: 1"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      
+      <!-- Marker entities will be created for each image target -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-plane color="green" opacity="0.5" position="0 0 0" height="0.5" width="0.5" rotation="0 0 0"></a-plane>
+        <a-text value="Marker 1" position="0 0.6 0" scale="0.5 0.5 0.5" align="center" color="white"></a-text>
+      </a-entity>
+      
+      <!-- Add more target entities as needed, incrementing targetIndex -->
+      <!-- For example: -->
+      <a-entity mindar-image-target="targetIndex: 1">
+        <a-plane color="blue" opacity="0.5" position="0 0 0" height="0.5" width="0.5" rotation="0 0 0"></a-plane>
+        <a-text value="Marker 2" position="0 0.6 0" scale="0.5 0.5 0.5" align="center" color="white"></a-text>
+      </a-entity>
+      
+      <!-- Add more targets as needed -->
+    </a-scene>
+  </div>
 
   <!-- JS scripts -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="svg.js"></script>
   <script src="leaflet.js"></script>
-  <script src="MarkerHandler.js"></script> <!-- Your external JS file -->
-
   <script>
-    // Initialize the Leaflet map
-    /*var map = L.map('map').setView([51.505, -0.09], 13); // Example coordinates
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);*/
+    // Wait until everything is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+      // Hide loading screen once everything is ready
+      const sceneEl = document.querySelector('a-scene');
+      
+      sceneEl.addEventListener('loaded', function () {
+        console.log("A-Frame scene loaded");
+      });
+      
+      sceneEl.addEventListener('arReady', function () {
+        console.log("AR system is ready");
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('arStatus').textContent = 'Ready';
+      });
+      
+      sceneEl.addEventListener('arError', function (event) {
+        console.error("AR error:", event.detail);
+        document.getElementById('arStatus').textContent = 'Error: ' + event.detail;
+      });
+      
+      // Debug toggle functionality
+      document.getElementById('debugToggle').addEventListener('click', function() {
+        const debugInfo = document.getElementById('debugInfo');
+        if (debugInfo.style.display === 'none') {
+          debugInfo.style.display = 'block';
+        } else {
+          debugInfo.style.display = 'none';
+        }
+      });
+    });
   </script>
+  
+  <!-- Include your custom MarkerHandler after other scripts are loaded -->
+  <script src="MarkerHandler.js"></script>
 </body>
 </html>
