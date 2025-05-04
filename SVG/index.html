@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SVG Graph Parser with Dijkstra</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script> <!-- A-Frame CDN -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row; /* Side-by-side layout */
+    }
+
+    #map {
+      width: 460px;
+      height: 900px;
+    }
+
+    #svgObject {
+      width: 600px;
+      height: 900px;
+      border-left: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="map"></div>
+    <object id="svgObject" type="image/svg+xml" data="RDSC.svg"></object>
+  </div>
+
+  <!-- A-Frame scene element for markerhandler -->
+  <a-scene embedded></a-scene>
+
+  <!-- JS scripts -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="svg.js"></script>
+  <script src="leaflet.js"></script>
+  <script src="MarkerHandler.js"></script> <!-- Your external JS file -->
+</body>
+</html>
