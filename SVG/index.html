@@ -34,14 +34,10 @@
     }
 
     #svgObject {
-      position: absolute;
-      width: 600px;
-      height: 900px;
-      top: 0;
-      right: 0;
-      z-index: 2; /* Ensures SVG is above the map */
-      display: none;
-    }
+  visibility: hidden; /* or */
+  opacity: 0;
+  pointer-events: none; /* optional: prevents accidental clicks */
+}
 
     /* A-Frame scene setup */
     a-scene {
