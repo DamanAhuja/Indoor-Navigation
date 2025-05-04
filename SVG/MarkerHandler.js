@@ -30,6 +30,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Attach the markerhandler component to the scene
         document.querySelector('a-scene').setAttribute('markerhandler', '');
+        
+        function mockImageDetection(targetIndex) {
+            const event = new CustomEvent('targetFound', {
+                detail: { targetIndex }
+            });
+            scene.dispatchEvent(event);
+        }
+
+        // Simulate target detection with a specific index (e.g., 0 for the first marker)
+        mockImageDetection(0); 
     } else {
         console.error("AFRAME is not loaded");
     }
