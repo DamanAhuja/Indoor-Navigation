@@ -63,13 +63,11 @@
   </div>
   
   <!-- A-Frame AR scene -->
-  <a-scene embedded background="transparent: true" mindar="targetFile: ./Target Images/targets.mind; uiHint: false">
+  <a-scene mindar-image="imageTargetSrc: ../Target Images/targets.mind; uiHint: false" embedded>
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
     
     <!-- AR content will be placed on the target image -->
     <a-entity mindar-image-target="targetIndex: 0">
-      <!-- A plane that will serve as background for our map -->
-      <a-plane position="0 0 0" rotation="0 0 0" width="1.2" height="1.2" color="#f0f0f0" opacity="0.7"></a-plane>
       
       <!-- A text label -->
       <a-text value="Navigation Map" position="0 0.7 0" align="center" color="#000" scale="0.5 0.5 0.5"></a-text>
