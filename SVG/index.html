@@ -87,6 +87,7 @@
       document.querySelector('a-scene').addEventListener('arReady', function() {
         document.body.classList.add('ar-active');
         console.log('AR is ready, map should be visible');
+        document.getElementById('map').style.zIndex = '200';
       });
 
       
