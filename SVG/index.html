@@ -53,7 +53,7 @@
   </div>
 
   <!-- A-Frame AR scene -->
-  <a-scene embedded mindar="targetFile: ./Target Images/targets.mind; uiHint: false">
+  <a-scene embedded mindar="targetFile: ../Target Images/targets.mind; uiHint: false">
     <!-- Add your A-Frame entities here -->
   </a-scene>
 
@@ -65,8 +65,8 @@
 
   <script>
     // Initialize the Leaflet map
-    var map = L.map('map').setView([51.505, -0.09], 13); // Example coordinates
-    /*L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    /*var map = L.map('map').setView([51.505, -0.09], 13); // Example coordinates
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);*/
   </script>
