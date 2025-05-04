@@ -84,10 +84,10 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Signal when AR is active
-      document.querySelector('a-scene').systems['mindar-image'].start().then(() => {
-         document.body.classList.add('ar-active');
-         console.log('AR started, map shown');
-            });
+      document.querySelector('a-scene').addEventListener('arReady', function() {
+        document.body.classList.add('ar-active');
+        console.log('AR is ready, map should be visible');
+      });
 
       
       // Handle AR camera movement to keep map visible
