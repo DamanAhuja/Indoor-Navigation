@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    this.style.display = 'none';
     if (typeof AFRAME !== 'undefined') {
         AFRAME.registerComponent('markerhandler', {
             init: function () {
