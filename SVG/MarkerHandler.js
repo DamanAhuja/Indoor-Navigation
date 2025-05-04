@@ -1,94 +1,36 @@
-// MarkerHandler.js - Updated for MindAR integration with version fix
-
 document.addEventListener("DOMContentLoaded", function () {
-    if (typeof AFRAME === 'undefined') {
-        console.error("AFRAME is not loaded");
-        return;
-    }
+    if (typeof AFRAME !== 'undefined') {
+        AFRAME.registerComponent('markerhandler', {
+            init: function () {
+                this.el.sceneEl.addEventListener('targetFound', (e) => {
+                    const targetIndex = e.detail.targetIndex;
 
-    console.log("Initializing MarkerHandler component...");
-    
-    // Status indicator function
-    function updateStatus(message, isError = false) {
-        const statusEl = document.getElementById('statusIndicator');
-        if (statusEl) {
-            statusEl.textContent = message;
-            statusEl.style.backgroundColor = isError ? 
-                "rgba(255, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.7)";
-        }
-    }
+                    // Check if the targetIndex is valid for the mindFiles array
+                    if (targetIndex < mindFiles.length) {
+                        // Get the .mind file from the mindFiles array using the targetIndex
+                        const selectedMindFile = mindFiles[targetIndex];
+                        console.log("Selected .mind file:", selectedMindFile);
 
-    // Register the markerhandler component
-    AFRAME.registerComponent('markerhandler', {
-        init: function () {
-            console.log("MarkerHandler component initialized on", this.el.id);
-            
-            // Store a reference to this component
-            const self = this;
-            
-            // Get the target index from the entity
-            const targetIndex = this.el.getAttribute('mindar-image-target').targetIndex;
-            console.log(`Setting up handler for target index: ${targetIndex}`);
-            
-            // Set up event listeners for MindAR target detection
-            this.el.addEventListener('targetFound', function () {
-                console.log(`Target ${targetIndex} found!`);
-                updateStatus(`Marker ${targetIndex + 1} detected!`);
-                
-                // Update debug info
-                document.getElementById('detectedIndex').textContent = targetIndex;
-                
-                // Get SVG nodes if available
-                const svgNodes = window.extractedNodes || [];
-                
-                if (svgNodes.length > 0) {
-                    // Use the targetIndex to map to the corresponding SVG node
-                    const markerId = svgNodes[targetIndex]?.id;
-                    
-                    console.log("Detected marker index:", targetIndex, "-> Node ID:", markerId);
-                    document.getElementById('lastMarker').textContent = markerId || 'Unknown';
-                    
-                    // If we have a valid marker ID and the setUserLocation function exists, call it
-                    if (markerId && typeof window.setUserLocation === 'function') {
-                        window.setUserLocation(markerId);
+                        // Now get the corresponding marker ID from the extractedNodes array
+                        const svgNodes = window.extractedNodes || [];
+                        const markerId = svgNodes[targetIndex]?.id;  // Get marker ID by index
+
+                        console.log("Detected marker index:", targetIndex, "-> Marker ID:", markerId);
+
+                        if (markerId && typeof window.setUserLocation === 'function') {
+                            // Pass the markerId to the setUserLocation function
+                            window.setUserLocation(markerId);
+                        }
+                    } else {
+                        console.error("Invalid target index:", targetIndex);
                     }
-                } else {
-                    console.warn("No SVG nodes available for mapping");
-                    document.getElementById('lastMarker').textContent = 'No SVG nodes';
-                }
-            });
-            
-            this.el.addEventListener('targetLost', function () {
-                console.log(`Target ${targetIndex} lost`);
-                updateStatus("Marker lost. Scan again.");
-            });
-        }
-    });
+                });
+            }
+        });
 
-    // Wait until A-Frame is ready before attaching components
-    const scene = document.querySelector('a-scene');
-    if (scene.hasLoaded) {
-        attachMarkerHandlers();
+        // Attach the markerhandler component to the scene
+        document.querySelector('a-scene').setAttribute('markerhandler', '');
     } else {
-        scene.addEventListener('loaded', attachMarkerHandlers);
-    }
-
-    function attachMarkerHandlers() {
-        // Attach the markerhandler component to all mindar-image-target entities
-        const targets = document.querySelectorAll('a-entity[mindar-image-target]');
-        
-        if (targets.length > 0) {
-            console.log(`Attaching markerhandler to ${targets.length} targets`);
-            targets.forEach(target => {
-                if (!target.hasAttribute('markerhandler')) {
-                    target.setAttribute('markerhandler', '');
-                    console.log(`Attached markerhandler to ${target.id || 'unnamed target'}`);
-                }
-            });
-            updateStatus("Ready to scan markers");
-        } else {
-            console.warn("No mindar-image-targets found");
-            updateStatus("No markers configured", true);
-        }
+        console.error("AFRAME is not loaded");
     }
 });
